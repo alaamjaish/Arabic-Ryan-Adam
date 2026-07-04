@@ -39,9 +39,13 @@ export default function NounPage() {
 
   function mark(remembered: boolean) {
     recordReview('noun', noun.id, remembered);
-    setFlash(remembered ? '+10 XP · nice!' : '+3 XP · we’ll bring it back');
+    setFlash(remembered ? 'nice!' : 'we’ll bring it back');
     setTimeout(() => setFlash(null), 1600);
   }
+
+  const fem = isFeminine(noun.singular.ar);
+  const dem = fem ? 'هاي' : 'هاد'; // this (f) / this (m)
+  const demPh = fem ? 'hay' : 'haad';
 
   return (
     <div style={{ maxWidth: 640 }}>
@@ -69,7 +73,7 @@ export default function NounPage() {
 
       <h2 style={{ fontSize: 16, marginTop: 20, marginBottom: 8 }}>Used in a sentence</h2>
       <div className="card" style={{ padding: 4 }}>
-        <Sentence ar={`هاد ال${noun.singular.ar}`} ph={`haad il-${noun.singular.ph}`} en={`this ${noun.english}`} />
+        <Sentence ar={`${dem} ال${noun.singular.ar}`} ph={`${demPh} il-${noun.singular.ph}`} en={`this ${noun.english}`} />
         <Sentence ar={`هدول ال${noun.plural.ar}`} ph={`hadol il-${noun.plural.ph}`} en={`these ${noun.english}s`} border />
         <Sentence ar={`عندي ${noun.singular.ar}`} ph={`3indi ${noun.singular.ph}`} en={`I have a ${noun.english}`} border />
       </div>
@@ -111,6 +115,13 @@ function Sentence({ ar, ph, en, border }: { ar: string; ph: string; en: string; 
       <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>{en}</div>
     </div>
   );
+}
+
+// Feminine if it ends in ة (taa marbuta) — plus the common irregular feminines
+// (paired body parts + a few nature words) that don't.
+const FEM_OVERRIDES = new Set(['أذن', 'عين', 'إيد', 'إجر', 'سما', 'نار', 'ريح', 'شمس', 'يد', 'رجل']);
+function isFeminine(ar: string): boolean {
+  return ar.endsWith('ة') || FEM_OVERRIDES.has(ar);
 }
 
 const navBtn: React.CSSProperties = {
