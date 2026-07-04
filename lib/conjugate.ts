@@ -68,11 +68,16 @@ function pastDirect(v: Verb): ConjTable {
     row('inta', v.pastAna.ar, v.pastAna.ph),
     row('inti', v.pastAna.ar + 'ي', v.pastAna.ph + 'i'), // شفت + ي = شفتي (keep the ت)
     row('intu', v.pastAna.ar + 'و', v.pastAna.ph + 'u'), // شفت + و = شفتو (keep the ت)
-    // شف + نا = شفنا (drop the ت). If the root already ends in ن, the two ن
-    // merge into a shadda: كن + نا → كنّا (NOT كننا).
+    // نحنا. Normal: drop the ت (شف → شفنا). But:
+    //  - root ends in ت (مات/فات/بات, pastHuwa ends in ت): keep it → متنا, فتنا, بتنا
+    //  - root ends in ن (كان → كن): the two ن merge into a shadda → كنّا
     row(
       'ne7na',
-      stemAr.endsWith('ن') ? stemAr + 'ّا' : stemAr + 'نا',
+      v.pastHuwa.ar.endsWith('ت')
+        ? v.pastAna.ar + 'نا'
+        : stemAr.endsWith('ن')
+        ? stemAr + 'ّا'
+        : stemAr + 'نا',
       stemPh + 'na'
     ),
     row('huwe', v.pastHuwa.ar, v.pastHuwa.ph),
@@ -206,9 +211,13 @@ function pastHabitual(v: Verb): ConjTable {
 function imperative(v: Verb): ConjRow[] {
   const stem = stripLeadingHamza(v.arPresent);
   const stemPh = stripLeadingVowelPh(v.phPresent);
-  const needsHelper = v.family === 2 || v.family === 5;
-  let baseAr = needsHelper ? 'ا' + stem : stem; // ا + stem
-  let basePh = needsHelper ? 'i' + stemPh : stemPh;
+  // form VIII/X verbs (pastHuwa starts with ا: اختار، احتاج، اتّصل) keep their
+  // initial alif in the command (اختار, not ختار). Families 2 & 5 take a
+  // helping alif too. Everything else just drops the أ.
+  const augmented = v.pastHuwa.ar.startsWith('ا');
+  const needsHelper = augmented || v.family === 2 || v.family === 5;
+  const baseAr = needsHelper ? 'ا' + stem : stem;
+  const basePh = augmented ? 'e' + stemPh : needsHelper ? 'i' + stemPh : stemPh;
 
   const endsYa = baseAr.endsWith('ي');
   const endsIph = /i$/i.test(basePh);
