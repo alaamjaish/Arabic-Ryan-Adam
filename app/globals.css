@@ -1,0 +1,138 @@
+@import 'tailwindcss';
+
+/* ---- theme tokens ---- */
+:root {
+  --bg: #fbf7f0;
+  --bg-soft: #f3ece0;
+  --card: #ffffff;
+  --ink: #2b2620;
+  --ink-soft: #6b6157;
+  --line: #e7ddcd;
+  --brand: #d97a34; /* warm terracotta */
+  --brand-ink: #b45f1e;
+  --f1: #0ea5e9;
+  --f2: #10b981;
+  --f3: #8b5cf6;
+  --f4: #f43f5e;
+  --f5: #f59e0b;
+  --good: #16a34a;
+  --bad: #dc2626;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17140f;
+    --bg-soft: #201b14;
+    --card: #221d16;
+    --ink: #f3ece0;
+    --ink-soft: #b6a891;
+    --line: #352c22;
+    --brand: #e8894a;
+    --brand-ink: #f0a165;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.arabic {
+  font-family: 'Segoe UI', 'Noto Naskh Arabic', 'Amiri', 'Times New Roman', serif;
+  direction: rtl;
+  unicode-bidi: isolate;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.btn {
+  border-radius: 12px;
+  font-weight: 600;
+  transition: transform 0.06s ease, filter 0.15s ease, background 0.15s ease;
+}
+.btn:active {
+  transform: translateY(1px) scale(0.99);
+}
+.btn-brand {
+  background: var(--brand);
+  color: #fff;
+}
+.btn-brand:hover {
+  filter: brightness(1.05);
+}
+
+.fade-in {
+  animation: fadeIn 0.25s ease both;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pop {
+  animation: pop 0.28s cubic-bezier(0.2, 1.4, 0.5, 1) both;
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* flashcard flip */
+.flip {
+  perspective: 1200px;
+}
+.flip-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+.flip-inner.flipped {
+  transform: rotateY(180deg);
+}
+.flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.flip-back {
+  transform: rotateY(180deg);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 8px;
+}
