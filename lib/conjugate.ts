@@ -68,7 +68,13 @@ function pastDirect(v: Verb): ConjTable {
     row('inta', v.pastAna.ar, v.pastAna.ph),
     row('inti', v.pastAna.ar + 'ي', v.pastAna.ph + 'i'), // شفت + ي = شفتي (keep the ت)
     row('intu', v.pastAna.ar + 'و', v.pastAna.ph + 'u'), // شفت + و = شفتو (keep the ت)
-    row('ne7na', stemAr + 'نا', stemPh + 'na'), // شف + نا = شفنا (drop the ت)
+    // شف + نا = شفنا (drop the ت). If the root already ends in ن, the two ن
+    // merge into a shadda: كن + نا → كنّا (NOT كننا).
+    row(
+      'ne7na',
+      stemAr.endsWith('ن') ? stemAr + 'ّا' : stemAr + 'نا',
+      stemPh + 'na'
+    ),
     row('huwe', v.pastHuwa.ar, v.pastHuwa.ph),
     row('hiye', heAr + 'ت', hePh + 'at'), // + ت
     row(
