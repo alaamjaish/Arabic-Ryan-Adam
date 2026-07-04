@@ -53,22 +53,10 @@ export function StarButton({ type, id }: { type: ItemType; id: string }) {
   );
 }
 
+// DRAFT badge disabled per Alaa's request — the `draft` flag stays in the data
+// for tracking, but nothing renders in the UI.
 export function DraftTag() {
-  return (
-    <span
-      title="AI-drafted — pending Alaa's verification"
-      style={{
-        fontSize: 10,
-        fontWeight: 700,
-        color: '#b45309',
-        background: 'color-mix(in srgb, #f59e0b 18%, transparent)',
-        borderRadius: 6,
-        padding: '1px 6px',
-      }}
-    >
-      DRAFT
-    </span>
-  );
+  return null;
 }
 
 export function Ar({ children, size = 28 }: { children: React.ReactNode; size?: number }) {
@@ -87,7 +75,7 @@ export function Ph({ children }: { children: React.ReactNode }) {
 export function ConjTableView({ rows, autoNote }: { rows: ConjTable; autoNote?: boolean }) {
   return (
     <div className="card" style={{ overflow: 'hidden' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
+      <table className="conjtable" style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
         <tbody>
           {rows.map((r: ConjRow, i) => {
             const meta = PRONOUNS.find((p) => p.key === r.pronoun)!;

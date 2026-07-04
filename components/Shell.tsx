@@ -2,25 +2,23 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
 import { useStore } from '@/lib/store';
 import LoginGate from './LoginGate';
 
 const NAV = [
   { href: '/', label: 'Home', icon: '🏠' },
-  { href: '/method', label: 'The Method', icon: '🧭' },
-  { href: '/families', label: 'Families', icon: '🗂️' },
   { href: '/verbs', label: 'Verbs', icon: '📖' },
+  { href: '/adjectives', label: 'Adjectives', icon: '🎨' },
+  { href: '/nouns', label: 'Nouns', icon: '📦' },
+  { href: '/words', label: 'Words', icon: '🗣️' },
   { href: '/flashcards', label: 'Flashcards', icon: '🃏' },
-  { href: '/assessment', label: 'Sort Test', icon: '🎯' },
+  { href: '/assessment', label: 'Test', icon: '🎯' },
   { href: '/revision', label: 'Revise', icon: '🔁' },
-  { href: '/progress', label: 'Progress', icon: '📈' },
 ];
 
 export default function Shell({ children }: { children: React.ReactNode }) {
-  const { ready, student, level, stats, signOut } = useStore();
+  const { ready, student, signOut } = useStore();
   const pathname = usePathname();
-  const [menu, setMenu] = useState(false);
 
   if (!ready) {
     return <div style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center' }}>…</div>;
@@ -34,57 +32,28 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           position: 'sticky',
           top: 0,
           zIndex: 30,
-          background: 'color-mix(in srgb, var(--bg) 88%, transparent)',
+          background: 'color-mix(in srgb, var(--bg) 90%, transparent)',
           backdropFilter: 'blur(8px)',
           borderBottom: '1px solid var(--line)',
         }}
       >
-        <div style={{ maxWidth: 1080, margin: '0 auto', padding: '10px 16px' }}>
+        <div style={{ maxWidth: 1080, margin: '0 auto', padding: '10px 14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button
-              onClick={() => setMenu((m) => !m)}
-              className="btn"
-              style={{ display: 'inline-flex', background: 'var(--bg-soft)', padding: '8px 10px' }}
-              aria-label="Menu"
-            >
-              ☰
-            </button>
             <Link href="/" style={{ fontWeight: 800, fontSize: 17, textDecoration: 'none', color: 'var(--ink)' }}>
-              عربي · Ryan & Adam
+              <span className="arabic">عربي</span> · Ryan &amp; Adam
             </Link>
-            <div style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div title="Streak" style={{ fontWeight: 700, fontSize: 14 }}>
-                🔥 {stats.streak}
-              </div>
-              <div style={{ minWidth: 120 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--ink-soft)' }}>
-                  <span>Lvl {level.level}</span>
-                  <span>{level.intoLevel}/{level.needed}</span>
-                </div>
-                <div style={{ height: 7, background: 'var(--bg-soft)', borderRadius: 6, overflow: 'hidden', marginTop: 2 }}>
-                  <div
-                    style={{
-                      width: `${Math.round(level.pct * 100)}%`,
-                      height: '100%',
-                      background: 'var(--brand)',
-                      transition: 'width 0.4s ease',
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
+            <button
+              onClick={signOut}
+              className="btn"
+              title={`Sign out (${student.email})`}
+              style={{ marginInlineStart: 'auto', background: 'var(--bg-soft)', color: 'var(--ink-soft)', padding: '7px 12px', fontSize: 13 }}
+            >
+              Sign out
+            </button>
           </div>
 
-          {/* desktop nav */}
-          <nav
-            style={{
-              display: 'flex',
-              gap: 4,
-              marginTop: 10,
-              overflowX: 'auto',
-              paddingBottom: 2,
-            }}
-          >
+          {/* nav — scrolls horizontally on small screens */}
+          <nav className="topnav" style={{ display: 'flex', gap: 4, marginTop: 10, overflowX: 'auto', paddingBottom: 2 }}>
             {NAV.map((n) => {
               const active = pathname === n.href || (n.href !== '/' && pathname.startsWith(n.href));
               return (
@@ -94,7 +63,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                   style={{
                     textDecoration: 'none',
                     whiteSpace: 'nowrap',
-                    padding: '7px 12px',
+                    padding: '8px 13px',
                     borderRadius: 10,
                     fontSize: 14,
                     fontWeight: 600,
@@ -111,45 +80,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      {menu && (
-        <div
-          onClick={() => setMenu(false)}
-          style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'rgba(0,0,0,0.35)' }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="card"
-            style={{ margin: 16, padding: 16, maxWidth: 320 }}
-          >
-            <div style={{ fontWeight: 700, marginBottom: 8 }}>{student.name}</div>
-            <div style={{ fontSize: 13, color: 'var(--ink-soft)', marginBottom: 12 }}>{student.email}</div>
-            <div style={{ display: 'grid', gap: 4 }}>
-              {NAV.map((n) => (
-                <Link
-                  key={n.href}
-                  href={n.href}
-                  onClick={() => setMenu(false)}
-                  style={{ textDecoration: 'none', color: 'var(--ink)', padding: '8px 6px', borderRadius: 8 }}
-                >
-                  {n.icon} {n.label}
-                </Link>
-              ))}
-            </div>
-            <button
-              onClick={() => {
-                setMenu(false);
-                signOut();
-              }}
-              className="btn"
-              style={{ marginTop: 12, background: 'var(--bg-soft)', padding: '8px 12px', width: '100%' }}
-            >
-              Sign out
-            </button>
-          </div>
-        </div>
-      )}
-
-      <main style={{ maxWidth: 1080, margin: '0 auto', padding: '22px 16px 80px' }} className="fade-in" key={pathname}>
+      <main style={{ maxWidth: 1080, margin: '0 auto', padding: '22px 16px 90px' }} className="fade-in" key={pathname}>
         {children}
       </main>
     </div>

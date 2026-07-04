@@ -13,7 +13,7 @@ import { Verb } from '@/lib/types';
 // Transliteration: 7=ح, 3=ع, kh=خ, sh=ش, gh=غ, q=ق, DH/9=emphatic.
 // ============================================================================
 
-export const VERBS: Verb[] = [
+const ALL_VERBS: Verb[] = [
   // ----- FAMILY 1 — Middle Vowel (verified, from PDF) -----------------------
   { id: 'be', english: 'I be', arPresent: 'أكون', phPresent: 'Akoon', family: 1, pastAna: { ar: 'كنت', ph: 'Kunt' }, pastHuwa: { ar: 'كان', ph: 'Kan' } },
   { id: 'go', english: 'I go', arPresent: 'أروح', phPresent: 'Aroo7', family: 1, pastAna: { ar: 'رحت', ph: 'Ru7t' }, pastHuwa: { ar: 'راح', ph: 'Ra7' } },
@@ -43,15 +43,12 @@ export const VERBS: Verb[] = [
   { id: 'get-lost', english: 'I get lost', arPresent: 'أضيع', phPresent: 'Adee3', family: 1, pastAna: { ar: 'ضعت', ph: 'Di3t' }, pastHuwa: { ar: 'ضاع', ph: 'Daa3' }, draft: true },
   { id: 'turn-around', english: 'I turn around', arPresent: 'أدور', phPresent: 'Adoor', family: 1, pastAna: { ar: 'درت', ph: 'Durt' }, pastHuwa: { ar: 'دار', ph: 'Daar' }, draft: true },
   { id: 'wake-up', english: 'I wake up', arPresent: 'أفوق', phPresent: 'Afooq', family: 1, pastAna: { ar: 'فقت', ph: 'Fuqt' }, pastHuwa: { ar: 'فاق', ph: 'Faaq' }, draft: true },
-  { id: 'swim', english: 'I swim', arPresent: 'أعوم', phPresent: 'A3oom', family: 1, pastAna: { ar: 'عمت', ph: '3umt' }, pastHuwa: { ar: 'عام', ph: '3aam' }, draft: true },
   { id: 'be-absent', english: 'I be absent', arPresent: 'أغيب', phPresent: 'Agheeb', family: 1, pastAna: { ar: 'غبت', ph: 'Ghibt' }, pastHuwa: { ar: 'غاب', ph: 'Ghaab' }, draft: true },
   { id: 'spend-the-night', english: 'I spend the night', arPresent: 'أبات', phPresent: 'Abaat', family: 1, pastAna: { ar: 'بت', ph: 'Bitt' }, pastHuwa: { ar: 'بات', ph: 'Baat' }, draft: true },
-  { id: 'return', english: 'I return', arPresent: 'أعود', phPresent: 'A3ood', family: 1, pastAna: { ar: 'عدت', ph: '3udt' }, pastHuwa: { ar: 'عاد', ph: '3aad' }, draft: true },
   { id: 'shout', english: 'I shout', arPresent: 'أصيح', phPresent: 'Asee7', family: 1, pastAna: { ar: 'صحت', ph: 'Si7t' }, pastHuwa: { ar: 'صاح', ph: 'Saa7' }, draft: true },
   { id: 'step-on', english: 'I step on', arPresent: 'أدوس', phPresent: 'Adoos', family: 1, pastAna: { ar: 'دست', ph: 'Dust' }, pastHuwa: { ar: 'داس', ph: 'Daas' }, draft: true },
   { id: 'measure', english: 'I measure', arPresent: 'أقيس', phPresent: 'Aqees', family: 1, pastAna: { ar: 'قست', ph: 'Qist' }, pastHuwa: { ar: 'قاس', ph: 'Qaas' }, draft: true },
   { id: 'get-jealous', english: 'I get jealous', arPresent: 'أغار', phPresent: 'Aghaar', family: 1, pastAna: { ar: 'غرت', ph: 'Ghirt' }, pastHuwa: { ar: 'غار', ph: 'Ghaar' }, draft: true },
-  { id: 'topple', english: 'I fall (topple)', arPresent: 'أطيح', phPresent: 'Atee7', family: 1, pastAna: { ar: 'طحت', ph: 'Ti7t' }, pastHuwa: { ar: 'طاح', ph: 'Taa7' }, draft: true },
   { id: 'roam', english: 'I roam', arPresent: 'أطوف', phPresent: 'Atoof', family: 1, pastAna: { ar: 'طفت', ph: 'Tuft' }, pastHuwa: { ar: 'طاف', ph: 'Taaf' }, draft: true },
   { id: 'kiss', english: 'I kiss', arPresent: 'أبوس', phPresent: 'Aboos', family: 1, pastAna: { ar: 'بست', ph: 'Bust' }, pastHuwa: { ar: 'باس', ph: 'Baas' }, draft: true },
   { id: 'sew', english: 'I sew', arPresent: 'أخيط', phPresent: 'Akheet', family: 1, pastAna: { ar: 'خطت', ph: 'Khitt' }, pastHuwa: { ar: 'خاط', ph: 'Khaat' }, draft: true },
@@ -81,11 +78,8 @@ export const VERBS: Verb[] = [
   // ----- FAMILY 2 — End Vowel (AI draft) ------------------------------------
   { id: 'grill', english: 'I grill', arPresent: 'أشوي', phPresent: 'Ashwi', family: 2, pastAna: { ar: 'شويت', ph: 'Shawait' }, pastHuwa: { ar: 'شوى', ph: 'Shawa' }, draft: true },
   { id: 'call-out', english: 'I call (call out)', arPresent: 'أنادي', phPresent: 'Anaadi', family: 2, pastAna: { ar: 'ناديت', ph: 'Naadait' }, pastHuwa: { ar: 'نادى', ph: 'Naada' }, draft: true },
-  { id: 'jog', english: 'I run (jog)', arPresent: 'أجري', phPresent: 'Ajri', family: 2, pastAna: { ar: 'جريت', ph: 'Jarait' }, pastHuwa: { ar: 'جرى', ph: 'Jara' }, draft: true },
-  { id: 'remain', english: 'I remain', arPresent: 'أبقى', phPresent: 'Abqa', family: 2, pastAna: { ar: 'بقيت', ph: 'Baqeet' }, pastHuwa: { ar: 'بقي', ph: 'Biqi' }, draft: true },
   { id: 'agree', english: 'I agree', arPresent: 'أرضى', phPresent: 'ArDa', family: 2, pastAna: { ar: 'رضيت', ph: 'ReDeet' }, pastHuwa: { ar: 'رضي', ph: 'RiDi' }, draft: true },
   { id: 'protect', english: 'I protect', arPresent: 'أحمي', phPresent: 'A7mi', family: 2, pastAna: { ar: 'حميت', ph: '7amait' }, pastHuwa: { ar: 'حمى', ph: '7ama' }, draft: true },
-  { id: 'paint', english: 'I paint', arPresent: 'أطلي', phPresent: 'Atli', family: 2, pastAna: { ar: 'طليت', ph: 'Talait' }, pastHuwa: { ar: 'طلى', ph: 'Tala' }, draft: true },
   { id: 'complain', english: 'I complain', arPresent: 'أشكي', phPresent: 'Ashki', family: 2, pastAna: { ar: 'شكيت', ph: 'Shakait' }, pastHuwa: { ar: 'شكى', ph: 'Shaka' }, draft: true },
   { id: 'iron', english: 'I iron', arPresent: 'أكوي', phPresent: 'Akwi', family: 2, pastAna: { ar: 'كويت', ph: 'Kawait' }, pastHuwa: { ar: 'كوى', ph: 'Kawa' }, draft: true },
   { id: 'boil', english: 'I boil', arPresent: 'أغلي', phPresent: 'Aghli', family: 2, pastAna: { ar: 'غليت', ph: 'Ghalait' }, pastHuwa: { ar: 'غلى', ph: 'Ghala' }, draft: true },
@@ -99,7 +93,6 @@ export const VERBS: Verb[] = [
   { id: 'invite', english: 'I invite', arPresent: 'أدعي', phPresent: 'Ad3i', family: 2, pastAna: { ar: 'دعيت', ph: 'Da3ait' }, pastHuwa: { ar: 'دعى', ph: 'Da3a' }, draft: true },
   { id: 'fry', english: 'I fry', arPresent: 'أقلي', phPresent: 'Aqli', family: 2, pastAna: { ar: 'قليت', ph: 'Qalait' }, pastHuwa: { ar: 'قلى', ph: 'Qala' }, draft: true },
   { id: 'crave', english: 'I crave', arPresent: 'أشتهي', phPresent: 'Eshtahi', family: 2, pastAna: { ar: 'اشتهيت', ph: 'Eshtahait' }, pastHuwa: { ar: 'اشتهى', ph: 'Eshtaha' }, draft: true },
-  { id: 'sign', english: 'I sign', arPresent: 'أمضي', phPresent: 'EmDi', family: 2, pastAna: { ar: 'مضيت', ph: 'EmDait' }, pastHuwa: { ar: 'مضى', ph: 'EmDa' }, draft: true },
   { id: 'water', english: 'I water', arPresent: 'أسقي', phPresent: 'Asqi', family: 2, pastAna: { ar: 'سقيت', ph: 'Saqait' }, pastHuwa: { ar: 'سقى', ph: 'Saqa' }, draft: true },
 
   // ----- FAMILY 3 — 3-Letter Shaddeh (verified, from PDF) -------------------
@@ -165,9 +158,9 @@ export const VERBS: Verb[] = [
   { id: 'drop-off', english: 'I drop off', arPresent: 'أوصّل', phPresent: 'Awassel', family: 4, pastAna: { ar: 'وصلت', ph: 'Wassalt' }, pastHuwa: { ar: 'وصّل', ph: 'Wassal' }, draft: true },
   { id: 'call', english: 'I call (phone)', arPresent: 'أتّصل', phPresent: 'Attasel', family: 4, pastAna: { ar: 'اتصلت', ph: 'Ttasalt' }, pastHuwa: { ar: 'اتّصل', ph: 'Ttasal' }, draft: true },
   { id: 'imagine', english: 'I imagine', arPresent: 'أتخيّل', phPresent: 'Atkhayyal', family: 4, pastAna: { ar: 'اتخيلت', ph: 'Tkhayyalt' }, pastHuwa: { ar: 'اتخيّل', ph: 'Tkhayyal' }, draft: true },
-  { id: 'explain', english: 'I explain', arPresent: 'أوضّح', phPresent: 'Awadde7', family: 4, pastAna: { ar: 'وضحت', ph: 'Wadda7t' }, pastHuwa: { ar: 'وضّح', ph: 'Wadda7' }, draft: true },
   { id: 'greet', english: 'I greet', arPresent: 'أسلّم', phPresent: 'Asallem', family: 4, pastAna: { ar: 'سلمت', ph: 'Sallamt' }, pastHuwa: { ar: 'سلّم', ph: 'Sallam' }, draft: true },
   { id: 'film', english: 'I film', arPresent: 'أصوّر', phPresent: 'Asawwer', family: 4, pastAna: { ar: 'صورت', ph: 'Sawwart' }, pastHuwa: { ar: 'صوّر', ph: 'Sawwar' }, draft: true },
+  { id: 'sign', english: 'I sign', arPresent: 'أوقّع', phPresent: 'Awaqqe3', family: 4, pastAna: { ar: 'وقّعت', ph: 'Waqqa3t' }, pastHuwa: { ar: 'وقّع', ph: 'Waqqa3' }, draft: true },
 
   // ----- FAMILY 5 — Regular (verified, from PDF) ----------------------------
   { id: 'hear', english: 'I hear', arPresent: 'أسمع', phPresent: 'Asma3', family: 5, pastAna: { ar: 'سمعت', ph: 'Smi3t' }, pastHuwa: { ar: 'سمع', ph: 'Smi3' } },
@@ -222,7 +215,80 @@ export const VERBS: Verb[] = [
   { id: 'sweep', english: 'I sweep', arPresent: 'أكنس', phPresent: 'Aknos', family: 5, pastAna: { ar: 'كنست', ph: 'Kanast' }, pastHuwa: { ar: 'كنس', ph: 'Kanas' }, draft: true },
   { id: 'mix', english: 'I mix', arPresent: 'أخلط', phPresent: 'Akhlot', family: 5, pastAna: { ar: 'خلطت', ph: 'Khalatt' }, pastHuwa: { ar: 'خلط', ph: 'Khalat' }, draft: true },
   { id: 'hang-publish', english: 'I hang / publish', arPresent: 'أنشر', phPresent: 'Anshor', family: 5, pastAna: { ar: 'نشرت', ph: 'Nashart' }, pastHuwa: { ar: 'نشر', ph: 'Nashar' }, draft: true },
+  { id: 'swim', english: 'I swim', arPresent: 'أسبح', phPresent: 'Asba7', family: 5, pastAna: { ar: 'سبحت', ph: 'Saba7t' }, pastHuwa: { ar: 'سبح', ph: 'Saba7' }, draft: true },
+  { id: 'return', english: 'I return', arPresent: 'أرجع', phPresent: 'Arja3', family: 5, pastAna: { ar: 'رجعت', ph: 'Rja3t' }, pastHuwa: { ar: 'رجع', ph: 'Rija3' }, draft: true },
+  { id: 'paint', english: 'I paint', arPresent: 'أدهن', phPresent: 'Adhan', family: 5, pastAna: { ar: 'دهنت', ph: 'Dahant' }, pastHuwa: { ar: 'دهن', ph: 'Dahan' }, draft: true },
+  { id: 'explain', english: 'I explain', arPresent: 'أشرح', phPresent: 'Ashra7', family: 5, pastAna: { ar: 'شرحت', ph: 'Shara7t' }, pastHuwa: { ar: 'شرح', ph: 'Shara7' }, draft: true },
+
+  // ===== MORE VERBS (AI draft, 2nd batch) =====
+  // Family 1
+  { id: 'choose', english: 'I choose', arPresent: 'أختار', phPresent: 'Akhtaar', family: 1, pastAna: { ar: 'اخترت', ph: 'Ekhtart' }, pastHuwa: { ar: 'اختار', ph: 'Ekhtaar' }, draft: true },
+  { id: 'need', english: 'I need', arPresent: 'أحتاج', phPresent: 'A7taaj', family: 1, pastAna: { ar: 'احتجت', ph: 'E7tajt' }, pastHuwa: { ar: 'احتاج', ph: 'E7taaj' }, draft: true },
+  { id: 'rest', english: 'I rest / relax', arPresent: 'أرتاح', phPresent: 'Artaa7', family: 1, pastAna: { ar: 'ارتحت', ph: 'Erta7t' }, pastHuwa: { ar: 'ارتاح', ph: 'Ertaa7' }, draft: true },
+  { id: 'meet-someone', english: 'I meet (someone)', arPresent: 'أقابل', phPresent: 'Aqaabel', family: 1, pastAna: { ar: 'قابلت', ph: 'Qaabalt' }, pastHuwa: { ar: 'قابل', ph: 'Qaabal' }, draft: true },
+  { id: 'benefit', english: 'I benefit', arPresent: 'أستفيد', phPresent: 'Astafeed', family: 1, pastAna: { ar: 'استفدت', ph: 'Estafadt' }, pastHuwa: { ar: 'استفاد', ph: 'Estafaad' }, draft: true },
+  { id: 'add', english: 'I add', arPresent: 'أضيف', phPresent: 'Adeef', family: 1, pastAna: { ar: 'ضفت', ph: 'Daft' }, pastHuwa: { ar: 'ضاف', ph: 'Daaf' }, draft: true },
+  { id: 'help', english: 'I help', arPresent: 'أساعد', phPresent: 'Asaa3ed', family: 1, pastAna: { ar: 'ساعدت', ph: 'Saa3adt' }, pastHuwa: { ar: 'ساعد', ph: 'Saa3ad' }, draft: true },
+  { id: 'travel', english: 'I travel', arPresent: 'أسافر', phPresent: 'Asaafer', family: 1, pastAna: { ar: 'سافرت', ph: 'Saafart' }, pastHuwa: { ar: 'سافر', ph: 'Saafar' }, draft: true },
+  { id: 'get-used-to', english: 'I get used to', arPresent: 'أعتاد', phPresent: 'A3taad', family: 1, pastAna: { ar: 'اعتدت', ph: 'E3tadt' }, pastHuwa: { ar: 'اعتاد', ph: 'E3taad' }, draft: true },
+  { id: 'participate', english: 'I participate', arPresent: 'أشارك', phPresent: 'Ashaarek', family: 1, pastAna: { ar: 'شاركت', ph: 'Shaarakt' }, pastHuwa: { ar: 'شارك', ph: 'Shaarak' }, draft: true },
+  { id: 'manage', english: 'I manage / run', arPresent: 'أدير', phPresent: 'Adeer', family: 1, pastAna: { ar: 'أدرت', ph: 'Adart' }, pastHuwa: { ar: 'أدار', ph: 'Adaar' }, draft: true },
+  // Family 2
+  { id: 'hope', english: 'I hope / plead', arPresent: 'أرجو', phPresent: 'Arjo', family: 2, pastAna: { ar: 'رجيت', ph: 'Rjeet' }, pastHuwa: { ar: 'رجا', ph: 'Raja' }, draft: true },
+  { id: 'survive', english: 'I survive / escape', arPresent: 'أنجو', phPresent: 'Anjo', family: 2, pastAna: { ar: 'نجيت', ph: 'Njeet' }, pastHuwa: { ar: 'نجا', ph: 'Naja' }, draft: true },
+  { id: 'strive', english: 'I strive / seek', arPresent: 'أسعى', phPresent: 'As3a', family: 2, pastAna: { ar: 'سعيت', ph: 'Sa3ait' }, pastHuwa: { ar: 'سعى', ph: 'Sa3a' }, draft: true },
+  { id: 'suffer', english: 'I suffer', arPresent: 'أعاني', phPresent: 'A3aani', family: 2, pastAna: { ar: 'عانيت', ph: '3aanait' }, pastHuwa: { ar: 'عانى', ph: '3aana' }, draft: true },
+  { id: 'rent', english: 'I rent', arPresent: 'أكتري', phPresent: 'Aktari', family: 2, pastAna: { ar: 'اكتريت', ph: 'Ektarait' }, pastHuwa: { ar: 'اكترى', ph: 'Ektara' }, draft: true },
+  { id: 'feel-shy', english: 'I feel shy / embarrassed', arPresent: 'أستحي', phPresent: 'Asta7i', family: 2, pastAna: { ar: 'استحيت', ph: 'Esta7ait' }, pastHuwa: { ar: 'استحى', ph: 'Esta7a' }, draft: true },
+  { id: 'disappear', english: 'I disappear', arPresent: 'أختفي', phPresent: 'Akhtafi', family: 2, pastAna: { ar: 'اختفيت', ph: 'Ekhtafait' }, pastHuwa: { ar: 'اختفى', ph: 'Ekhtafa' }, draft: true },
+  // Family 3
+  { id: 'guide', english: 'I guide / show the way', arPresent: 'أدلّ', phPresent: 'Adell', family: 3, pastAna: { ar: 'دلّيت', ph: 'Dallait' }, pastHuwa: { ar: 'دلّ', ph: 'Dall' }, draft: true },
+  { id: 'get-bored', english: 'I get bored', arPresent: 'أملّ', phPresent: 'Amall', family: 3, pastAna: { ar: 'ملّيت', ph: 'Mallait' }, pastHuwa: { ar: 'ملّ', ph: 'Mall' }, draft: true },
+  { id: 'insist', english: 'I insist', arPresent: 'أصرّ', phPresent: 'Asirr', family: 3, pastAna: { ar: 'صرّيت', ph: 'Sarrait' }, pastHuwa: { ar: 'صرّ', ph: 'Sarr' }, draft: true },
+  { id: 'spray', english: 'I spray / sprinkle', arPresent: 'أرشّ', phPresent: 'Arishsh', family: 3, pastAna: { ar: 'رشّيت', ph: 'Rashshait' }, pastHuwa: { ar: 'رشّ', ph: 'Rashsh' }, draft: true },
+  { id: 'tidy-pack', english: 'I tidy / pack up', arPresent: 'أضبّ', phPresent: 'Adobb', family: 3, pastAna: { ar: 'ضبّيت', ph: 'Dabbait' }, pastHuwa: { ar: 'ضبّ', ph: 'Dabb' }, draft: true },
+  { id: 'park-line-up', english: 'I park / line up', arPresent: 'أصفّ', phPresent: 'Asoff', family: 3, pastAna: { ar: 'صفّيت', ph: 'Saffait' }, pastHuwa: { ar: 'صفّ', ph: 'Saff' }, draft: true },
+  { id: 'cough', english: 'I cough', arPresent: 'أكحّ', phPresent: 'Ako77', family: 3, pastAna: { ar: 'كحّيت', ph: 'Ka77ait' }, pastHuwa: { ar: 'كحّ', ph: 'Ka77' }, draft: true },
+  { id: 'wrap', english: 'I wrap', arPresent: 'ألفّ', phPresent: 'Aleff', family: 3, pastAna: { ar: 'لفّيت', ph: 'Laffait' }, pastHuwa: { ar: 'لفّ', ph: 'Laff' }, draft: true },
+  // Family 4
+  { id: 'raise', english: 'I raise / bring up', arPresent: 'أربّي', phPresent: 'Arabbi', family: 4, pastAna: { ar: 'ربّيت', ph: 'Rabbait' }, pastHuwa: { ar: 'ربّى', ph: 'Rabba' }, draft: true },
+  { id: 'cover', english: 'I cover', arPresent: 'أغطّي', phPresent: 'Aghatti', family: 4, pastAna: { ar: 'غطّيت', ph: 'Ghattait' }, pastHuwa: { ar: 'غطّى', ph: 'Ghatta' }, draft: true },
+  { id: 'fill', english: 'I fill', arPresent: 'أعبّي', phPresent: 'A3abbi', family: 4, pastAna: { ar: 'عبّيت', ph: '3abbait' }, pastHuwa: { ar: 'عبّى', ph: '3abba' }, draft: true },
+  { id: 'stop-something', english: 'I stop (something)', arPresent: 'أوقّف', phPresent: 'Awa22ef', family: 4, pastAna: { ar: 'وقّفت', ph: 'Wa22aft' }, pastHuwa: { ar: 'وقّف', ph: 'Wa22af' }, draft: true },
+  { id: 'recommend-order', english: 'I recommend / order (food)', arPresent: 'أوصّي', phPresent: 'Awassi', family: 4, pastAna: { ar: 'وصّيت', ph: 'Wassait' }, pastHuwa: { ar: 'وصّى', ph: 'Wassa' }, draft: true },
+  { id: 'arrange', english: 'I arrange / organize', arPresent: 'أرتّب', phPresent: 'Aratteb', family: 4, pastAna: { ar: 'رتّبت', ph: 'Rattabt' }, pastHuwa: { ar: 'رتّب', ph: 'Rattab' }, draft: true },
+  { id: 'divide', english: 'I divide / split up', arPresent: 'أقسّم', phPresent: 'Aqassem', family: 4, pastAna: { ar: 'قسّمت', ph: 'Qassamt' }, pastHuwa: { ar: 'قسّم', ph: 'Qassam' }, draft: true },
+  { id: 'distribute', english: 'I distribute / hand out', arPresent: 'أوزّع', phPresent: 'Awazze3', family: 4, pastAna: { ar: 'وزّعت', ph: 'Wazza3t' }, pastHuwa: { ar: 'وزّع', ph: 'Wazza3' }, draft: true },
+  { id: 'record-register', english: 'I record / register', arPresent: 'أسجّل', phPresent: 'Asajjel', family: 4, pastAna: { ar: 'سجّلت', ph: 'Sajjalt' }, pastHuwa: { ar: 'سجّل', ph: 'Sajjal' }, draft: true },
+  { id: 'train-someone', english: 'I train (someone)', arPresent: 'أدرّب', phPresent: 'Adarreb', family: 4, pastAna: { ar: 'درّبت', ph: 'Darrabt' }, pastHuwa: { ar: 'درّب', ph: 'Darrab' }, draft: true },
+  { id: 'improve', english: 'I improve', arPresent: 'أحسّن', phPresent: 'A7assen', family: 4, pastAna: { ar: 'حسّنت', ph: '7assant' }, pastHuwa: { ar: 'حسّن', ph: '7assan' }, draft: true },
+  { id: 'save-provide', english: 'I save / provide', arPresent: 'أوفّر', phPresent: 'Awaffer', family: 4, pastAna: { ar: 'وفّرت', ph: 'Waffart' }, pastHuwa: { ar: 'وفّر', ph: 'Waffar' }, draft: true },
+  { id: 'quit', english: 'I quit / stop doing', arPresent: 'أبطّل', phPresent: 'Abattel', family: 4, pastAna: { ar: 'بطّلت', ph: 'Battalt' }, pastHuwa: { ar: 'بطّل', ph: 'Battal' }, draft: true },
+  // Family 5
+  { id: 'touch', english: 'I touch', arPresent: 'ألمس', phPresent: 'Almos', family: 5, pastAna: { ar: 'لمست', ph: 'Lamast' }, pastHuwa: { ar: 'لمس', ph: 'Lamas' }, draft: true },
+  { id: 'lift', english: 'I lift / raise', arPresent: 'أرفع', phPresent: 'Arfa3', family: 5, pastAna: { ar: 'رفعت', ph: 'Rafa3t' }, pastHuwa: { ar: 'رفع', ph: 'Rafa3' }, draft: true },
+  { id: 'move-transfer', english: 'I move / transfer', arPresent: 'أنقل', phPresent: 'Anqol', family: 5, pastAna: { ar: 'نقلت', ph: 'Naqalt' }, pastHuwa: { ar: 'نقل', ph: 'Naqal' }, draft: true },
+  { id: 'memorize', english: 'I memorize / keep', arPresent: 'أحفظ', phPresent: 'A7faz', family: 5, pastAna: { ar: 'حفظت', ph: '7afazt' }, pastHuwa: { ar: 'حفظ', ph: '7afaz' }, draft: true },
+  { id: 'squeeze', english: 'I squeeze', arPresent: 'أعصر', phPresent: 'A3sor', family: 5, pastAna: { ar: 'عصرت', ph: '3asart' }, pastHuwa: { ar: 'عصر', ph: '3asar' }, draft: true },
+  { id: 'press', english: 'I press / push a button', arPresent: 'أكبس', phPresent: 'Akbos', family: 5, pastAna: { ar: 'كبست', ph: 'Kabast' }, pastHuwa: { ar: 'كبس', ph: 'Kabas' }, draft: true },
+  { id: 'pinch', english: 'I pinch', arPresent: 'أقرص', phPresent: 'Aqros', family: 5, pastAna: { ar: 'قرصت', ph: 'Qarast' }, pastHuwa: { ar: 'قرص', ph: 'Qaras' }, draft: true },
+  { id: 'stick-glue', english: 'I stick / glue', arPresent: 'ألزق', phPresent: 'Alzoq', family: 5, pastAna: { ar: 'لزقت', ph: 'Lazaqt' }, pastHuwa: { ar: 'لزق', ph: 'Lazaq' }, draft: true },
+  { id: 'bake', english: 'I bake', arPresent: 'أخبز', phPresent: 'Akhboz', family: 5, pastAna: { ar: 'خبزت', ph: 'Khabazt' }, pastHuwa: { ar: 'خبز', ph: 'Khabaz' }, draft: true },
+  { id: 'burn', english: 'I burn', arPresent: 'أحرق', phPresent: 'A7roq', family: 5, pastAna: { ar: 'حرقت', ph: '7araqt' }, pastHuwa: { ar: 'حرق', ph: '7araq' }, draft: true },
+  { id: 'swallow', english: 'I swallow', arPresent: 'أبلع', phPresent: 'Abla3', family: 5, pastAna: { ar: 'بلعت', ph: 'Bala3t' }, pastHuwa: { ar: 'بلع', ph: 'Bala3' }, draft: true },
+  { id: 'chew', english: 'I chew', arPresent: 'أمضغ', phPresent: 'Amdogh', family: 5, pastAna: { ar: 'مضغت', ph: 'Madaght' }, pastHuwa: { ar: 'مضغ', ph: 'Madagh' }, draft: true },
+  { id: 'blow-inflate', english: 'I blow / inflate', arPresent: 'أنفخ', phPresent: 'Anfokh', family: 5, pastAna: { ar: 'نفخت', ph: 'Nafakht' }, pastHuwa: { ar: 'نفخ', ph: 'Nafakh' }, draft: true },
+  { id: 'bury', english: 'I bury', arPresent: 'أدفن', phPresent: 'Adfen', family: 5, pastAna: { ar: 'دفنت', ph: 'Dafant' }, pastHuwa: { ar: 'دفن', ph: 'Dafan' }, draft: true },
+  { id: 'peel', english: 'I peel', arPresent: 'أقشر', phPresent: 'Aqsher', family: 5, pastAna: { ar: 'قشرت', ph: 'Qashart' }, pastHuwa: { ar: 'قشر', ph: 'Qashar' }, draft: true },
+  { id: 'flip', english: 'I flip / turn over', arPresent: 'أقلب', phPresent: 'Aqleb', family: 5, pastAna: { ar: 'قلبت', ph: 'Qalabt' }, pastHuwa: { ar: 'قلب', ph: 'Qalab' }, draft: true },
+  { id: 'knead', english: 'I knead', arPresent: 'أعجن', phPresent: 'A3jen', family: 5, pastAna: { ar: 'عجنت', ph: '3ajant' }, pastHuwa: { ar: 'عجن', ph: '3ajan' }, draft: true },
+  { id: 'charge-ship', english: 'I charge / ship', arPresent: 'أشحن', phPresent: 'Ash7an', family: 5, pastAna: { ar: 'شحنت', ph: 'Sha7ant' }, pastHuwa: { ar: 'شحن', ph: 'Sha7an' }, draft: true },
+  { id: 'separate-disconnect', english: 'I separate / disconnect', arPresent: 'أفصل', phPresent: 'Afsel', family: 5, pastAna: { ar: 'فصلت', ph: 'Fasalt' }, pastHuwa: { ar: 'فصل', ph: 'Fasal' }, draft: true },
 ];
+
+// Sorted by family (stable — insertion order preserved within each family),
+// so every "all verbs" view groups F1 → F5 cleanly.
+export const VERBS: Verb[] = [...ALL_VERBS].sort((a, b) => a.family - b.family);
 
 export const VERBS_BY_ID: Record<string, Verb> = Object.fromEntries(
   VERBS.map((v) => [v.id, v])

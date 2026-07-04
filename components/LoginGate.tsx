@@ -22,9 +22,14 @@ export default function LoginGate() {
   return (
     <div style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center', padding: 20 }}>
       <div className="card fade-in" style={{ width: '100%', maxWidth: 420, padding: 28 }}>
-        <div style={{ fontSize: 40, textAlign: 'center' }}>🇸🇾 ✦ 🇯🇴</div>
-        <h1 style={{ fontSize: 26, fontWeight: 800, textAlign: 'center', margin: '10px 0 2px' }}>
-          Arabic — for Ryan & Adam
+        <div className="arabic" style={{ fontSize: 34, textAlign: 'center', fontWeight: 800, color: 'var(--brand)' }}>
+          عربي شامي
+        </div>
+        <div style={{ textAlign: 'center', fontSize: 13, letterSpacing: 2, color: 'var(--ink-soft)', textTransform: 'uppercase', marginTop: 2 }}>
+          Levantine Arabic
+        </div>
+        <h1 style={{ fontSize: 24, fontWeight: 800, textAlign: 'center', margin: '10px 0 2px' }}>
+          for Ryan & Adam
         </h1>
         <p style={{ textAlign: 'center', color: 'var(--ink-soft)', marginTop: 0 }}>
           Your living reference & practice ground. Sign in with just your name and email — no password.

@@ -136,3 +136,24 @@ body {
   background: var(--line);
   border-radius: 8px;
 }
+
+/* never let the page scroll sideways on phones */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* mobile: let the conjugation table breathe instead of overflowing */
+@media (max-width: 480px) {
+  .conjtable td {
+    padding: 7px 8px !important;
+  }
+  .conjtable td:first-child,
+  .conjtable td:last-child {
+    width: auto !important;
+  }
+  .conjtable td:last-child {
+    font-size: 12px;
+  }
+}

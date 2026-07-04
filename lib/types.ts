@@ -30,6 +30,26 @@ export interface VocabWord {
   draft?: boolean;
 }
 
+// Adjectives carry three spoken forms: masculine / feminine / plural (people).
+export interface Adjective {
+  id: string;
+  english: string;
+  masc: WordPair;
+  fem: WordPair;
+  plural: WordPair;
+  draft?: boolean;
+}
+
+// Nouns carry singular + plural.
+export interface Noun {
+  id: string;
+  english: string;
+  singular: WordPair;
+  plural: WordPair;
+  category: string;
+  draft?: boolean;
+}
+
 // The 8 spoken pronouns, split into the two "keys" of the system.
 export type Pronoun =
   | 'ana'

@@ -1,143 +1,94 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo } from 'react';
 import { useStore } from '@/lib/store';
 import { VERBS } from '@/data/verbs';
-import { isDue } from '@/lib/srs';
-import { BADGES } from '@/lib/gamification';
-import { Tile } from '@/components/ui';
+import { ADJECTIVES } from '@/data/adjectives';
+import { NOUNS } from '@/data/nouns';
+import { VOCAB } from '@/data/vocab';
 
 export default function Home() {
-  const { student, level, stats, progress } = useStore();
-
-  const dueCount = useMemo(() => {
-    let n = 0;
-    for (const v of VERBS) {
-      const rec = progress[`verb:${v.id}`];
-      if (isDue(rec?.srs ?? undefined)) n += 1;
-    }
-    return n;
-  }, [progress]);
-
-  const earned = new Set(student?.badges ?? []);
+  const { student } = useStore();
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-        <h1 style={{ fontSize: 28, fontWeight: 800, margin: 0 }}>
-          Ahlan, {student?.name} 👋
-        </h1>
-        <span style={{ color: 'var(--ink-soft)' }}>Let’s keep the streak alive.</span>
+    <div style={{ maxWidth: 760 }}>
+      <h1 style={{ fontSize: 28, fontWeight: 800, margin: 0 }}>Ahlan, {student?.name} 👋</h1>
+      <p style={{ color: 'var(--ink-soft)', marginTop: 6, fontSize: 16, lineHeight: 1.6 }}>
+        This is your Levantine (Shami) Arabic home — everything Alaa taught you, kept alive in one place
+        so you can keep learning, look things up, and practice whenever you want.
+      </p>
+
+      {/* what's inside — real counts */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginTop: 18 }}>
+        <Count href="/verbs" n={VERBS.length} label="verbs" sub="full conjugation" icon="📖" />
+        <Count href="/adjectives" n={ADJECTIVES.length} label="adjectives" sub="3 forms each" icon="🎨" />
+        <Count href="/nouns" n={NOUNS.length} label="nouns" sub="singular + plural" icon="📦" />
+        <Count href="/flashcards" n={VOCAB.length} label="words" sub="+ flashcards" icon="🗣️" />
       </div>
 
-      {/* stat row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginTop: 16 }}>
-        <Stat label="Level" value={`${level.level}`} sub={`${level.intoLevel}/${level.needed} XP`} />
-        <Stat label="Streak" value={`🔥 ${stats.streak}`} sub="days" />
-        <Stat label="Reviews" value={`${stats.reviews}`} sub={`${stats.correct} correct`} />
-        <Stat label="Families cleared" value={`${stats.familiesCleared}/5`} sub="80%+ mastered" />
+      {/* how it works */}
+      <div className="card" style={{ padding: 20, marginTop: 20 }}>
+        <h2 style={{ margin: '0 0 8px', fontSize: 19 }}>How the verbs work</h2>
+        <p style={{ margin: 0, lineHeight: 1.7 }}>
+          Every verb comes from <b>one form</b> — the present “I” (the أ-form). From it, plus the two past
+          anchors (<span className="arabic">أنا</span> and <span className="arabic">هو</span>), the whole
+          grammar unfolds: <b>past</b>, the <b>كان</b> habitual past, <b>present</b>, the <b>عم</b>{' '}
+          continuous, the <b>راح</b> future, and the command. Tap any verb to see all of it laid out.
+        </p>
+        <p style={{ margin: '10px 0 0', lineHeight: 1.7 }}>
+          Verbs fall into <b>5 families</b> (by vowel and shaddeh). Learn to spot the family and you know
+          how a verb behaves — that’s what the <Link href="/assessment" style={link}>Test</Link> drills.
+        </p>
       </div>
 
-      {/* due for review CTA */}
-      <Link
-        href="/revision"
-        className="card"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 14,
-          padding: 18,
-          marginTop: 16,
-          textDecoration: 'none',
-          color: 'var(--ink)',
-          background: dueCount > 0 ? 'color-mix(in srgb, var(--brand) 12%, var(--card))' : 'var(--card)',
-        }}
-      >
-        <div style={{ fontSize: 34 }}>🔁</div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 800, fontSize: 18 }}>
-            {dueCount > 0 ? `${dueCount} cards due for review` : 'All caught up!'}
-          </div>
-          <div style={{ color: 'var(--ink-soft)', fontSize: 14 }}>
-            {dueCount > 0 ? 'Spaced repetition keeps them in long-term memory.' : 'Come back tomorrow, or learn something new below.'}
-          </div>
-        </div>
-        <div className="btn btn-brand" style={{ padding: '10px 16px' }}>
-          {dueCount > 0 ? 'Start' : 'Practice'}
-        </div>
-      </Link>
-
-      {/* quick actions */}
-      <h2 style={{ fontSize: 18, marginTop: 26, marginBottom: 10 }}>Jump in</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
-        <Tile href="/method">
-          <div style={{ fontSize: 26 }}>🧭</div>
-          <div style={{ fontWeight: 700, marginTop: 6 }}>The Method</div>
-          <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>Six grammars from one form</div>
-        </Tile>
-        <Tile href="/families">
-          <div style={{ fontSize: 26 }}>🗂️</div>
-          <div style={{ fontWeight: 700, marginTop: 6 }}>The 5 Families</div>
-          <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>How every verb is grouped</div>
-        </Tile>
-        <Tile href="/verbs">
-          <div style={{ fontSize: 26 }}>📖</div>
-          <div style={{ fontWeight: 700, marginTop: 6 }}>Verb Bank</div>
-          <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>{VERBS.length} verbs, full conjugation</div>
-        </Tile>
-        <Tile href="/flashcards">
-          <div style={{ fontSize: 26 }}>🃏</div>
-          <div style={{ fontWeight: 700, marginTop: 6 }}>Flashcards</div>
-          <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>Verbs & vocabulary</div>
-        </Tile>
-        <Tile href="/assessment">
-          <div style={{ fontSize: 26 }}>🎯</div>
-          <div style={{ fontWeight: 700, marginTop: 6 }}>Sort Test</div>
-          <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>Guess the family</div>
-        </Tile>
-        <Tile href="/progress">
-          <div style={{ fontSize: 26 }}>📈</div>
-          <div style={{ fontWeight: 700, marginTop: 6 }}>Progress</div>
-          <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>Mastery & badges</div>
-        </Tile>
+      {/* what you'll be able to do */}
+      <div className="card" style={{ padding: 20, marginTop: 14 }}>
+        <h2 style={{ margin: '0 0 8px', fontSize: 19 }}>By working through this you’ll be able to…</h2>
+        <ul style={{ margin: 0, paddingInlineStart: 20, lineHeight: 1.9 }}>
+          <li>Conjugate any everyday verb across all six tenses.</li>
+          <li>Describe things — masculine, feminine, and plural — with {ADJECTIVES.length}+ adjectives.</li>
+          <li>Name the objects around you, singular and plural.</li>
+          <li>Hold the core of daily spoken Levantine — the {VERBS.length} most useful verbs.</li>
+        </ul>
       </div>
 
-      {/* badges preview */}
-      <h2 style={{ fontSize: 18, marginTop: 26, marginBottom: 10 }}>Badges</h2>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {BADGES.map((b) => {
-          const on = earned.has(b.id);
-          return (
-            <div
-              key={b.id}
-              title={`${b.name} — ${b.desc}`}
-              className="card"
-              style={{
-                padding: '8px 10px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                opacity: on ? 1 : 0.4,
-                filter: on ? 'none' : 'grayscale(1)',
-              }}
-            >
-              <span style={{ fontSize: 18 }}>{b.emoji}</span>
-              <span style={{ fontSize: 13, fontWeight: 600 }}>{b.name}</span>
-            </div>
-          );
-        })}
+      {/* jump in */}
+      <h2 style={{ fontSize: 18, marginTop: 24, marginBottom: 10 }}>Where to go</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
+        <Tile href="/verbs" icon="📖" title="Verbs" sub="Browse & conjugate" />
+        <Tile href="/adjectives" icon="🎨" title="Adjectives" sub="3 forms in use" />
+        <Tile href="/nouns" icon="📦" title="Nouns" sub="Singular & plural" />
+        <Tile href="/flashcards" icon="🃏" title="Flashcards" sub="Study any deck" />
+        <Tile href="/assessment" icon="🎯" title="Test" sub="Families & meanings" />
+        <Tile href="/revision" icon="🔁" title="Revise" sub="Your starred ⭐ items" />
       </div>
+
+      <p style={{ color: 'var(--ink-soft)', fontSize: 13, marginTop: 20 }}>
+        Tip: tap the ☆ on anything you want to come back to — it collects in <Link href="/revision" style={link}>Revise</Link>.
+      </p>
     </div>
   );
 }
 
-function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
+const link: React.CSSProperties = { color: 'var(--brand-ink)', textDecoration: 'underline' };
+
+function Count({ href, n, label, sub, icon }: { href: string; n: number; label: string; sub: string; icon: string }) {
   return (
-    <div className="card" style={{ padding: 14 }}>
-      <div style={{ fontSize: 12, color: 'var(--ink-soft)', fontWeight: 600 }}>{label}</div>
-      <div style={{ fontSize: 24, fontWeight: 800, marginTop: 2 }}>{value}</div>
-      {sub && <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{sub}</div>}
-    </div>
+    <Link href={href} className="card" style={{ padding: 16, textDecoration: 'none', color: 'var(--ink)' }}>
+      <div style={{ fontSize: 22 }}>{icon}</div>
+      <div style={{ fontSize: 30, fontWeight: 800, marginTop: 2 }}>{n}</div>
+      <div style={{ fontWeight: 600 }}>{label}</div>
+      <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{sub}</div>
+    </Link>
+  );
+}
+
+function Tile({ href, icon, title, sub }: { href: string; icon: string; title: string; sub: string }) {
+  return (
+    <Link href={href} className="card" style={{ display: 'block', padding: 16, textDecoration: 'none', color: 'var(--ink)' }}>
+      <div style={{ fontSize: 24 }}>{icon}</div>
+      <div style={{ fontWeight: 700, marginTop: 6 }}>{title}</div>
+      <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>{sub}</div>
+    </Link>
   );
 }

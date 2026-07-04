@@ -66,9 +66,9 @@ function pastDirect(v: Verb): ConjTable {
   return [
     row('ana', v.pastAna.ar, v.pastAna.ph),
     row('inta', v.pastAna.ar, v.pastAna.ph),
-    row('inti', stemAr + 'ي', stemPh + 'i'), // + ي
-    row('intu', stemAr + 'و', stemPh + 'u'), // + و
-    row('ne7na', stemAr + 'نا', stemPh + 'na'), // + نا
+    row('inti', v.pastAna.ar + 'ي', v.pastAna.ph + 'i'), // شفت + ي = شفتي (keep the ت)
+    row('intu', v.pastAna.ar + 'و', v.pastAna.ph + 'u'), // شفت + و = شفتو (keep the ت)
+    row('ne7na', stemAr + 'نا', stemPh + 'na'), // شف + نا = شفنا (drop the ت)
     row('huwe', v.pastHuwa.ar, v.pastHuwa.ph),
     row('hiye', heAr + 'ت', hePh + 'at'), // + ت
     row(
@@ -87,32 +87,73 @@ interface PresentForms {
   ph: string;
 }
 
-function presentNoBe(v: Verb): Record<Pronoun, PresentForms> {
+// Present-tense prefix groups: أ (ana) / ت (inta,inti,intu,hiye) / ي (huwe,humme) / ن (ne7na).
+export type PresentGroup = 'a' | 't' | 'y' | 'n';
+
+export interface PresentSeg {
+  pronoun: Pronoun;
+  group: PresentGroup;
+  prefixAr: string;
+  coreAr: string;
+  suffixAr: string;
+  prefixPh: string;
+  corePh: string;
+  suffixPh: string;
+}
+
+const AR_END_VOWELS = ['ا', 'ى', 'ي']; // final-weak endings (Family 2 present stems)
+
+function arVowelFinal(s: string): boolean {
+  return s.length > 0 && AR_END_VOWELS.includes(s[s.length - 1]);
+}
+function phVowelFinal(p: string): boolean {
+  return /[aeiou]$/i.test(p);
+}
+function dropLast(x: string): string {
+  return x.slice(0, -1);
+}
+
+// Structured present ("no be") — prefix / core / suffix per pronoun, so the UI
+// can colour the prefix + changing suffix by their prefix-group. Family 2
+// (vowel-final) stems drop their final vowel before ي / وا (تمشي، تمشوا، يمشوا).
+export function presentSegments(v: Verb): PresentSeg[] {
   const s = stripLeadingHamza(v.arPresent);
   const p = stripLeadingVowelPh(v.phPresent);
-  return {
-    ana: { ar: v.arPresent, ph: v.phPresent },
-    inta: { ar: 'ت' + s, ph: 't' + p },
-    inti: { ar: 'ت' + s + 'ي', ph: 't' + p + 'i' },
-    intu: { ar: 'ت' + s + 'وا', ph: 't' + p + 'u' },
-    ne7na: { ar: 'ن' + s, ph: 'n' + p },
-    huwe: { ar: 'ي' + s, ph: 'y' + p },
-    hiye: { ar: 'ت' + s, ph: 't' + p },
-    humme: { ar: 'ي' + s + 'وا', ph: 'y' + p + 'u' },
-  };
+  const anaPrefixAr = v.arPresent.slice(0, 1); // أ / آ / ا
+  const anaPrefixPh = /^[A-Za-z]/.test(v.phPresent) ? v.phPresent.slice(0, 1) : 'A';
+  const sCut = arVowelFinal(s) ? dropLast(s) : s;
+  const pCut = phVowelFinal(p) ? dropLast(p) : p;
+
+  return [
+    { pronoun: 'ana', group: 'a', prefixAr: anaPrefixAr, coreAr: s, suffixAr: '', prefixPh: anaPrefixPh, corePh: p, suffixPh: '' },
+    { pronoun: 'inta', group: 't', prefixAr: 'ت', coreAr: s, suffixAr: '', prefixPh: 't', corePh: p, suffixPh: '' },
+    { pronoun: 'inti', group: 't', prefixAr: 'ت', coreAr: sCut, suffixAr: 'ي', prefixPh: 't', corePh: pCut, suffixPh: 'i' },
+    { pronoun: 'intu', group: 't', prefixAr: 'ت', coreAr: sCut, suffixAr: 'وا', prefixPh: 't', corePh: pCut, suffixPh: 'u' },
+    { pronoun: 'ne7na', group: 'n', prefixAr: 'ن', coreAr: s, suffixAr: '', prefixPh: 'n', corePh: p, suffixPh: '' },
+    { pronoun: 'huwe', group: 'y', prefixAr: 'ي', coreAr: s, suffixAr: '', prefixPh: 'y', corePh: p, suffixPh: '' },
+    { pronoun: 'hiye', group: 't', prefixAr: 'ت', coreAr: s, suffixAr: '', prefixPh: 't', corePh: p, suffixPh: '' },
+    { pronoun: 'humme', group: 'y', prefixAr: 'ي', coreAr: sCut, suffixAr: 'وا', prefixPh: 'y', corePh: pCut, suffixPh: 'u' },
+  ];
+}
+
+function segToForms(seg: PresentSeg): PresentForms {
+  return { ar: seg.prefixAr + seg.coreAr + seg.suffixAr, ph: seg.prefixPh + seg.corePh + seg.suffixPh };
+}
+
+function presentNoBe(v: Verb): Record<Pronoun, PresentForms> {
+  const out = {} as Record<Pronoun, PresentForms>;
+  for (const seg of presentSegments(v)) out[seg.pronoun] = segToForms(seg);
+  return out;
 }
 
 function presentWithBe(v: Verb): Record<Pronoun, PresentForms> {
+  const noBe = presentNoBe(v);
   const s = stripLeadingHamza(v.arPresent);
   const p = stripLeadingVowelPh(v.phPresent);
-  const noBe = presentNoBe(v);
   const out = {} as Record<Pronoun, PresentForms>;
   for (const pr of ORDER) {
-    if (pr === 'ana') {
-      out[pr] = { ar: 'ب' + s, ph: 'b' + p }; // بشوف / bshuuf
-    } else {
-      out[pr] = { ar: 'ب' + noBe[pr].ar, ph: 'b' + noBe[pr].ph }; // بتشوف ...
-    }
+    if (pr === 'ana') out[pr] = { ar: 'ب' + s, ph: 'b' + p }; // بمشي / bmshi
+    else out[pr] = { ar: 'ب' + noBe[pr].ar, ph: 'b' + noBe[pr].ph }; // بتمشي ...
   }
   return out;
 }
@@ -149,8 +190,8 @@ const KAN: Record<Pronoun, WordPair> = {
 };
 
 function pastHabitual(v: Verb): ConjTable {
-  const wb = presentWithBe(v);
-  return ORDER.map((pr) => row(pr, KAN[pr].ar + ' ' + wb[pr].ar, KAN[pr].ph + ' ' + wb[pr].ph));
+  const nb = presentNoBe(v); // كان + present WITHOUT the "be" (كنت أمشي، كان يمشي)
+  return ORDER.map((pr) => row(pr, KAN[pr].ar + ' ' + nb[pr].ar, KAN[pr].ph + ' ' + nb[pr].ph));
 }
 
 // ---- IMPERATIVE (inta / inti / intu) ------------------------------------

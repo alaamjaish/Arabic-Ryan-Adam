@@ -2,7 +2,9 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { VERBS_BY_ID, VERBS } from '@/data/verbs';
+import { VERBS_BY_ID } from '@/data/verbs';
+import { ADJ_BY_ID } from '@/data/adjectives';
+import { NOUNS_BY_ID } from '@/data/nouns';
 import { VOCAB } from '@/data/vocab';
 import { isDue } from '@/lib/srs';
 import { Ar, FamilyPill, Ph } from '@/components/ui';
@@ -10,8 +12,15 @@ import { Family } from '@/lib/types';
 import { ItemType, useStore } from '@/lib/store';
 
 type Item = { type: ItemType; id: string };
-
 const VOCAB_BY_ID = Object.fromEntries(VOCAB.map((w) => [w.id, w]));
+
+const SECTIONS: { k: ItemType | 'all'; label: string; icon: string }[] = [
+  { k: 'all', label: 'Everything', icon: '⭐' },
+  { k: 'verb', label: 'Verbs', icon: '📖' },
+  { k: 'adj', label: 'Adjectives', icon: '🎨' },
+  { k: 'noun', label: 'Nouns', icon: '📦' },
+  { k: 'vocab', label: 'Words', icon: '🗣️' },
+];
 
 function shuffle<T>(a: T[]): T[] {
   const r = [...a];
@@ -24,17 +33,16 @@ function shuffle<T>(a: T[]): T[] {
 
 export default function RevisionPage() {
   const { progress, recordReview } = useStore();
-  const [mode, setMode] = useState<'due' | 'new' | null>(null);
-  const [queue, setQueue] = useState<Item[]>([]);
+  const [queue, setQueue] = useState<Item[] | null>(null);
   const [i, setI] = useState(0);
   const [revealed, setRevealed] = useState(false);
-  const [count, setCount] = useState(0);
+  const [reviewed, setReviewed] = useState(0);
 
-  // how many are due right now (verbs + vocab that have been seen)
-  const dueItems = useMemo(() => {
+  // all STARRED items, grouped
+  const starred = useMemo(() => {
     const out: Item[] = [];
     for (const [k, rec] of Object.entries(progress)) {
-      if (rec.srs && isDue(rec.srs)) {
+      if (rec.starred) {
         const [type, ...rest] = k.split(':');
         out.push({ type: type as ItemType, id: rest.join(':') });
       }
@@ -42,75 +50,84 @@ export default function RevisionPage() {
     return out;
   }, [progress]);
 
-  function startDue() {
-    setQueue(shuffle(dueItems));
-    setMode('due');
-    setI(0);
-    setRevealed(false);
-    setCount(0);
+  const dueOf = (items: Item[]) => items.filter((it) => isDue(progress[`${it.type}:${it.id}`]?.srs ?? undefined));
+
+  function countFor(k: ItemType | 'all') {
+    const items = k === 'all' ? starred : starred.filter((s) => s.type === k);
+    return { total: items.length, due: dueOf(items).length };
   }
 
-  function startNew() {
-    const unseen = VERBS.filter((v) => !progress[`verb:${v.id}`]?.srs).slice(0, 100);
-    setQueue(shuffle(unseen).slice(0, 12).map((v) => ({ type: 'verb' as ItemType, id: v.id })));
-    setMode('new');
+  function start(k: ItemType | 'all') {
+    const items = k === 'all' ? starred : starred.filter((s) => s.type === k);
+    const due = dueOf(items);
+    setQueue(shuffle(due.length ? due : items));
     setI(0);
     setRevealed(false);
-    setCount(0);
+    setReviewed(0);
   }
 
   function grade(remembered: boolean) {
-    const item = queue[i];
+    const item = queue![i];
     if (item) recordReview(item.type, item.id, remembered);
-    setCount((c) => c + 1);
-    if (i + 1 >= queue.length) {
-      setMode(null);
-      setQueue([]);
-    } else {
+    setReviewed((c) => c + 1);
+    if (i + 1 >= queue!.length) setQueue(null);
+    else {
       setI(i + 1);
       setRevealed(false);
     }
   }
 
   // ---- landing ----
-  if (!mode) {
+  if (!queue) {
     return (
-      <div style={{ maxWidth: 520, margin: '0 auto' }}>
+      <div style={{ maxWidth: 560, margin: '0 auto' }}>
         <h1 style={{ fontSize: 26, fontWeight: 800 }}>Revision</h1>
         <p style={{ color: 'var(--ink-soft)', marginTop: 0 }}>
-          Spaced repetition brings cards back right before you’d forget them.
+          Your revision is built from <b>whatever you ⭐ star</b>. Star a verb, adjective, noun, or word
+          anywhere in the app and it lands here — spaced repetition then brings it back before you forget.
         </p>
 
-        {count > 0 && (
+        {reviewed > 0 && (
           <div className="card pop" style={{ padding: 14, marginBottom: 12, textAlign: 'center', color: 'var(--brand-ink)', fontWeight: 700 }}>
-            Session done — {count} cards reviewed 🎉
+            Session done — {reviewed} cards reviewed 🎉
           </div>
         )}
 
-        <div className="card" style={{ padding: 18, marginTop: 8 }}>
-          <div style={{ fontWeight: 700, fontSize: 18 }}>🔁 Due today</div>
-          <p style={{ color: 'var(--ink-soft)', margin: '6px 0 12px' }}>
-            {dueItems.length > 0 ? `${dueItems.length} cards are waiting.` : 'Nothing due right now — great job.'}
-          </p>
-          <button
-            className="btn btn-brand"
-            onClick={startDue}
-            disabled={dueItems.length === 0}
-            style={{ padding: '10px 18px', opacity: dueItems.length ? 1 : 0.5 }}
-          >
-            Review due cards
-          </button>
-        </div>
-
-        <div className="card" style={{ padding: 18, marginTop: 12 }}>
-          <div style={{ fontWeight: 700, fontSize: 18 }}>✨ Learn new</div>
-          <p style={{ color: 'var(--ink-soft)', margin: '6px 0 12px' }}>
-            Meet 12 verbs you haven’t seen yet and add them to your rotation.
-          </p>
-          <button className="btn" onClick={startNew} style={{ padding: '10px 18px', background: 'var(--bg-soft)' }}>
-            Start a new-learning session
-          </button>
-        </div>
+        {starred.length === 0 ? (
+          <div className="card" style={{ padding: 18, marginTop: 8 }}>
+            <div style={{ fontWeight: 700 }}>Nothing starred yet</div>
+            <p style={{ color: 'var(--ink-soft)' }}>
+              Tap the ☆ on any verb, adjective, noun, or word to add it to your revision.
+            </p>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <Link href="/verbs" className="btn btn-brand" style={{ padding: '8px 14px', textDecoration: 'none' }}>Browse verbs →</Link>
+              <Link href="/adjectives" className="btn" style={{ padding: '8px 14px', background: 'var(--bg-soft)', textDecoration: 'none', color: 'var(--ink)' }}>Adjectives →</Link>
+              <Link href="/nouns" className="btn" style={{ padding: '8px 14px', background: 'var(--bg-soft)', textDecoration: 'none', color: 'var(--ink)' }}>Nouns →</Link>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gap: 10, marginTop: 8 }}>
+            {SECTIONS.map((s) => {
+              const { total, due } = countFor(s.k);
+              return (
+                <button
+                  key={s.k}
+                  className="card"
+                  onClick={() => total > 0 && start(s.k)}
+                  disabled={total === 0}
+                  style={{ padding: 16, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 12, opacity: total ? 1 : 0.5, cursor: total ? 'pointer' : 'default', background: 'var(--card)' }}
+                >
+                  <span style={{ fontSize: 24 }}>{s.icon}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700 }}>{s.label}</div>
+                    <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>{total} starred · {due} due now</div>
+                  </div>
+                  {total > 0 && <span className="btn btn-brand" style={{ padding: '8px 14px' }}>{due > 0 ? 'Review' : 'Practice'}</span>}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   }
@@ -118,49 +135,72 @@ export default function RevisionPage() {
   // ---- card ----
   const item = queue[i];
   if (!item) return null;
-  const isVerb = item.type === 'verb';
-  const v = isVerb ? VERBS_BY_ID[item.id] : null;
-  const w = !isVerb ? VOCAB_BY_ID[item.id] : null;
+  const v = item.type === 'verb' ? VERBS_BY_ID[item.id] : null;
+  const a = item.type === 'adj' ? ADJ_BY_ID[item.id] : null;
+  const n = item.type === 'noun' ? NOUNS_BY_ID[item.id] : null;
+  const w = item.type === 'vocab' ? VOCAB_BY_ID[item.id] : null;
 
   return (
-    <div style={{ maxWidth: 520, margin: '0 auto' }}>
+    <div style={{ maxWidth: 560, margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: 'var(--ink-soft)' }}>
-        <span>{mode === 'due' ? 'Due review' : 'New learning'}</span>
+        <span>Revising ⭐</span>
         <span>{i + 1} / {queue.length}</span>
       </div>
       <div style={{ height: 6, background: 'var(--bg-soft)', borderRadius: 6, overflow: 'hidden', margin: '8px 0 18px' }}>
         <div style={{ width: `${(i / queue.length) * 100}%`, height: '100%', background: 'var(--brand)' }} />
       </div>
 
-      <div className="card" style={{ padding: 26, textAlign: 'center', minHeight: 180 }}>
-        {isVerb && v ? (
+      <div className="card" style={{ padding: 26, textAlign: 'center', minHeight: 190 }}>
+        {v && (
           <>
-            <Ar size={46}>{v.arPresent}</Ar>
+            <Ar size={44}>{v.arPresent}</Ar>
             <div style={{ marginTop: 6 }}><Ph>{v.phPresent}</Ph></div>
             {revealed && (
-              <div className="fade-in" style={{ marginTop: 14 }}>
+              <div className="fade-in" style={{ marginTop: 12 }}>
                 <div style={{ fontSize: 20, fontWeight: 700 }}>{v.english}</div>
                 <div style={{ marginTop: 8, display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
                   <span><Ph>past أنا:</Ph> <Ar size={18}>{v.pastAna.ar}</Ar></span>
                   <span><Ph>past هو:</Ph> <Ar size={18}>{v.pastHuwa.ar}</Ar></span>
                 </div>
-                <div style={{ marginTop: 10, display: 'inline-block' }}>
-                  <FamilyPill family={v.family as Family} small />
-                </div>
+                <div style={{ marginTop: 10 }}><FamilyPill family={v.family as Family} small /></div>
               </div>
             )}
           </>
-        ) : w ? (
+        )}
+        {a && (
           <>
-            <div style={{ fontSize: 24, fontWeight: 700 }}>{w.english}</div>
+            <div style={{ fontSize: 22, fontWeight: 700 }}>{a.english}</div>
             {revealed && (
-              <div className="fade-in" style={{ marginTop: 14 }}>
-                <Ar size={44}>{w.ar}</Ar>
+              <div className="fade-in" style={{ marginTop: 12, display: 'grid', gap: 6 }}>
+                <RevRow label="masc" ar={a.masc.ar} ph={a.masc.ph} />
+                <RevRow label="fem" ar={a.fem.ar} ph={a.fem.ph} />
+                <RevRow label="pl" ar={a.plural.ar} ph={a.plural.ph} />
+              </div>
+            )}
+          </>
+        )}
+        {n && (
+          <>
+            <div style={{ fontSize: 22, fontWeight: 700 }}>{n.english}</div>
+            {revealed && (
+              <div className="fade-in" style={{ marginTop: 12, display: 'grid', gap: 6 }}>
+                <RevRow label="sing" ar={n.singular.ar} ph={n.singular.ph} />
+                <RevRow label="pl" ar={n.plural.ar} ph={n.plural.ph} />
+              </div>
+            )}
+          </>
+        )}
+        {w && (
+          <>
+            <div style={{ fontSize: 22, fontWeight: 700 }}>{w.english}</div>
+            {revealed && (
+              <div className="fade-in" style={{ marginTop: 12 }}>
+                <Ar size={40}>{w.ar}</Ar>
                 <div style={{ marginTop: 6 }}><Ph>{w.ph}</Ph></div>
               </div>
             )}
           </>
-        ) : null}
+        )}
       </div>
 
       {!revealed ? (
@@ -169,22 +209,20 @@ export default function RevisionPage() {
         </button>
       ) : (
         <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
-          <button className="btn" onClick={() => grade(false)} style={{ flex: 1, background: 'var(--bg-soft)', padding: 13 }}>
-            Again
-          </button>
-          <button className="btn btn-brand" onClick={() => grade(true)} style={{ flex: 1, padding: 13 }}>
-            Good ✓
-          </button>
+          <button className="btn" onClick={() => grade(false)} style={{ flex: 1, background: 'var(--bg-soft)', padding: 13 }}>Again</button>
+          <button className="btn btn-brand" onClick={() => grade(true)} style={{ flex: 1, padding: 13 }}>Good ✓</button>
         </div>
       )}
+    </div>
+  );
+}
 
-      {isVerb && (
-        <div style={{ textAlign: 'center', marginTop: 12 }}>
-          <Link href={`/verbs/${item.id}`} style={{ fontSize: 13, color: 'var(--ink-soft)' }}>
-            see full conjugation →
-          </Link>
-        </div>
-      )}
+function RevRow({ label, ar, ph }: { label: string; ar: string; ph: string }) {
+  return (
+    <div style={{ display: 'flex', gap: 10, justifyContent: 'center', alignItems: 'center' }}>
+      <span style={{ fontSize: 12, color: 'var(--ink-soft)', minWidth: 52, textAlign: 'right' }}>{label}</span>
+      <Ar size={24}>{ar}</Ar>
+      <Ph>{ph}</Ph>
     </div>
   );
 }

@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { VERBS_BY_ID } from '@/data/verbs';
+import { useParams, useRouter } from 'next/navigation';
+import { VERBS, VERBS_BY_ID } from '@/data/verbs';
 import { conjugate, presentVariants } from '@/lib/conjugate';
 import { Family } from '@/lib/types';
 import { Ar, ConjTableView, DraftTag, FamilyPill, Ph, StarButton } from '@/components/ui';
@@ -30,6 +30,20 @@ export default function VerbPage() {
   const conj = useMemo(() => (verb ? conjugate(verb) : null), [verb]);
   const present = useMemo(() => (verb ? presentVariants(verb) : null), [verb]);
 
+  const router = useRouter();
+  const idx = VERBS.findIndex((x) => x.id === id);
+  const prev = idx > 0 ? VERBS[idx - 1] : null;
+  const next = idx >= 0 && idx < VERBS.length - 1 ? VERBS[idx + 1] : null;
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'ArrowRight' && next) router.push(`/verbs/${next.id}`);
+      else if (e.key === 'ArrowLeft' && prev) router.push(`/verbs/${prev.id}`);
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [next, prev, router]);
+
   if (!verb || !conj || !present) {
     return (
       <div>
@@ -49,9 +63,27 @@ export default function VerbPage() {
 
   return (
     <div style={{ maxWidth: 640 }}>
-      <Link href="/verbs" style={{ color: 'var(--ink-soft)', textDecoration: 'none', fontSize: 14 }}>
-        ← Verb bank
-      </Link>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Link href="/verbs" style={{ color: 'var(--ink-soft)', textDecoration: 'none', fontSize: 14 }}>
+          ← All verbs
+        </Link>
+        <div style={{ marginInlineStart: 'auto', display: 'flex', gap: 6 }}>
+          <Link
+            href={prev ? `/verbs/${prev.id}` : '#'}
+            className="btn"
+            style={{ ...arrowBtn, opacity: prev ? 1 : 0.35, pointerEvents: prev ? 'auto' : 'none' }}
+          >
+            ←<span style={arrowLbl}>{prev?.english.replace(/^I /, '') ?? ''}</span>
+          </Link>
+          <Link
+            href={next ? `/verbs/${next.id}` : '#'}
+            className="btn"
+            style={{ ...arrowBtn, opacity: next ? 1 : 0.35, pointerEvents: next ? 'auto' : 'none' }}
+          >
+            <span style={arrowLbl}>{next?.english.replace(/^I /, '') ?? ''}</span>→
+          </Link>
+        </div>
+      </div>
 
       <div className="card" style={{ padding: 18, marginTop: 10, borderTop: `4px solid var(--f${verb.family})` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -172,6 +204,45 @@ export default function VerbPage() {
         </div>
         {flash && <div className="pop" style={{ marginTop: 8, color: 'var(--brand-ink)', fontWeight: 700 }}>{flash}</div>}
       </div>
+
+      {/* prev / next navigation */}
+      <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+        {prev ? (
+          <Link href={`/verbs/${prev.id}`} className="btn" style={{ flex: 1, background: 'var(--bg-soft)', color: 'var(--ink)', padding: 12, textAlign: 'center', textDecoration: 'none' }}>
+            ← {prev.english}
+          </Link>
+        ) : (
+          <span style={{ flex: 1 }} />
+        )}
+        {next ? (
+          <Link href={`/verbs/${next.id}`} className="btn btn-brand" style={{ flex: 1, padding: 12, textAlign: 'center', textDecoration: 'none' }}>
+            {next.english} →
+          </Link>
+        ) : (
+          <span style={{ flex: 1 }} />
+        )}
+      </div>
+      <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--ink-soft)', marginTop: 8 }}>
+        tip: use ← → arrow keys to move between verbs
+      </p>
     </div>
   );
 }
+
+const arrowBtn: React.CSSProperties = {
+  background: 'var(--bg-soft)',
+  color: 'var(--ink)',
+  padding: '6px 10px',
+  fontSize: 13,
+  textDecoration: 'none',
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 4,
+  maxWidth: 140,
+};
+const arrowLbl: React.CSSProperties = {
+  maxWidth: 96,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+};

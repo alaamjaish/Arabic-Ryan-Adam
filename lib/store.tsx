@@ -6,7 +6,7 @@ import { SrsState, initialSrs, review as srsReview, isoDate } from './srs';
 import { BadgeStats, XP, earnedBadges, levelFromXp } from './gamification';
 import { VERBS, verbsByFamily } from '@/data/verbs';
 
-export type ItemType = 'verb' | 'vocab';
+export type ItemType = 'verb' | 'vocab' | 'adj' | 'noun';
 
 export interface ProgressRec {
   starred: boolean;
@@ -223,46 +223,39 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setProgress({});
   }, []);
 
-  const applyStudent = useCallback(
-    (updater: (s: Student) => Student, curP?: Record<string, ProgressRec>) => {
-      setStudent((prev) => {
-        if (!prev) return prev;
-        let next = touchStreak(prev);
-        next = updater(next);
-        // recompute badges
-        const st = computeStats(next, curP ?? progress);
-        const badges = earnedBadges(st).map((b) => b.id);
-        next = { ...next, badges };
-        persistLocal(next, curP ?? progress);
-        void syncStudent(next);
-        return next;
-      });
-    },
-    [persistLocal, progress, syncStudent, touchStreak]
-  );
-
   const get = useCallback(
     (t: ItemType, id: string): ProgressRec => progress[key(t, id)] ?? EMPTY,
     [progress]
   );
 
+  // XP + streak roll-over, as a pure functional update (safe under StrictMode).
+  const bump = useCallback(
+    (xpDelta: number, metaPatch?: Partial<StudentMeta>) => {
+      setStudent((prev) => {
+        if (!prev) return prev;
+        let next = touchStreak(prev);
+        next = { ...next, xp: next.xp + xpDelta };
+        if (metaPatch) next = { ...next, meta: { ...next.meta, ...metaPatch } };
+        return next;
+      });
+    },
+    [touchStreak]
+  );
+
   const toggleStar = useCallback(
     (t: ItemType, id: string) => {
-      if (!student) return;
       const k = key(t, id);
       const cur = progress[k] ?? EMPTY;
-      const rec = { ...cur, starred: !cur.starred };
-      const nextP = { ...progress, [k]: rec };
-      setProgress(nextP);
-      void syncProgress(student.email, t, id, rec);
-      applyStudent((s) => (rec.starred ? { ...s, xp: s.xp + XP.starVerb } : s), nextP);
+      const rec: ProgressRec = { ...cur, starred: !cur.starred };
+      setProgress((prev) => ({ ...prev, [k]: rec }));
+      if (student) void syncProgress(student.email, t, id, rec);
+      if (rec.starred) bump(XP.starVerb);
     },
-    [applyStudent, progress, student, syncProgress]
+    [progress, student, syncProgress, bump]
   );
 
   const recordReview = useCallback(
     (t: ItemType, id: string, remembered: boolean) => {
-      if (!student) return;
       const k = key(t, id);
       const cur = progress[k] ?? EMPTY;
       const srs = srsReview(cur.srs ?? initialSrs(), remembered);
@@ -272,46 +265,69 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         correct: cur.correct + (remembered ? 1 : 0),
         wrong: cur.wrong + (remembered ? 0 : 1),
       };
-      const nextP = { ...progress, [k]: rec };
-      setProgress(nextP);
-      void syncProgress(student.email, t, id, rec);
-      applyStudent(
-        (s) => ({ ...s, xp: s.xp + (remembered ? XP.reviewCorrect : XP.reviewWrong) }),
-        nextP
-      );
+      setProgress((prev) => ({ ...prev, [k]: rec }));
+      if (student) void syncProgress(student.email, t, id, rec);
+      bump(remembered ? XP.reviewCorrect : XP.reviewWrong);
     },
-    [applyStudent, progress, student, syncProgress]
+    [progress, student, syncProgress, bump]
   );
 
   const recordAssessment = useCallback(
     (total: number, correct: number) => {
-      if (!student) return;
       const passed = total > 0 && correct / total >= 0.8;
       const perfect = total > 0 && correct === total;
-      applyStudent((s) => ({
-        ...s,
-        xp: s.xp + correct * XP.assessmentCorrect,
-        meta: {
-          ...s.meta,
-          assessmentsPassed: s.meta.assessmentsPassed + (passed ? 1 : 0),
-          perfectAssessment: s.meta.perfectAssessment || perfect,
-        },
-      }));
+      setStudent((prev) => {
+        if (!prev) return prev;
+        let next = touchStreak(prev);
+        return {
+          ...next,
+          xp: next.xp + correct * XP.assessmentCorrect,
+          meta: {
+            ...next.meta,
+            assessmentsPassed: next.meta.assessmentsPassed + (passed ? 1 : 0),
+            perfectAssessment: next.meta.perfectAssessment || perfect,
+          },
+        };
+      });
     },
-    [applyStudent, student]
+    [touchStreak]
   );
 
   const bumpFlashcards = useCallback(
     (n = 1) => {
-      if (!student) return;
-      applyStudent((s) => ({
-        ...s,
-        xp: s.xp + n * XP.flashcardFlip,
-        meta: { ...s.meta, flashcards: s.meta.flashcards + n },
-      }));
+      setStudent((prev) => {
+        if (!prev) return prev;
+        const next = touchStreak(prev);
+        return {
+          ...next,
+          xp: next.xp + n * XP.flashcardFlip,
+          meta: { ...next.meta, flashcards: next.meta.flashcards + n },
+        };
+      });
     },
-    [applyStudent, student]
+    [touchStreak]
   );
+
+  // ---- persistence + badge derivation (single source of truth) ----
+  useEffect(() => {
+    if (!student) return;
+    const st = computeStats(student, progress);
+    const badges = earnedBadges(st).map((b) => b.id);
+    const changed =
+      badges.length !== student.badges.length || badges.some((b, i) => b !== student.badges[i]);
+    if (changed) {
+      setStudent((s) => (s ? { ...s, badges } : s));
+      return; // next run persists with the updated badges
+    }
+    persistLocal(student, progress);
+  }, [student, progress, persistLocal]);
+
+  // ---- debounced Supabase student sync ----
+  useEffect(() => {
+    if (!student) return;
+    const handle = setTimeout(() => void syncStudent(student), 400);
+    return () => clearTimeout(handle);
+  }, [student, syncStudent]);
 
   const stats = useMemo(
     () => (student ? computeStats(student, progress) : ZERO_STATS),
